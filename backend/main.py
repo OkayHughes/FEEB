@@ -30,6 +30,40 @@ def add_schedule(schedule_id):
         content = db.get('schedule_{}'.format(schedule_id))
         return jsonify(content)
 
+#Data contains: timestamp, weight
+#Data contains: timestamp, time to finish food, amt food
+#Data contians: timestamp, amt water
+
+@app.route('/api/add_data/<cat_id>/<data_type>', methods=['GET', 'POST'])
+def add_data(cat_id, data_type):
+    db.dcreate("data")
+    if request.method == 'POST':
+        content = request.json
+        if 'cat_{}_{}'.format(cat_id, data_type) not in db.getall():
+            db.set('cat_{}_{}'.format(cat_id, data_type), [])
+        db.set('cat_{}_{}'.format(cat_id, data_type), db.get('cat_{}_{}'.format(cat_id, data_type)) + [content])
+        return jsonify({"cat_id": cat_id, "data_type": data_type})
+    else:
+        content = db.get('cat_{}_{}'.format(cat_id, data_type))
+        data_type = int(data_type)
+        try:
+            if data_type == 0:
+                timestamps = [c["timestamp"] for c in content]
+                weights = [c["weight"] for c in content]
+                return jsonify({"timestamps": timestamps, "weights": weights})
+            elif data_type == 1:
+                timestamps = [c["timestamp"] for c in content]
+                ftimes = [c["ftime"] for c in content]
+                amts = [c["amt"] for c in content]
+                return jsonify({"timestamps": timestamps, "ftimes": ftimes, "amts": amts})
+            else:
+                timestamps = [c["timestamp"] for c in content]
+                amts = [c["amt"] for c in content]
+                return jsonify({"timestamps": timestamps, "amts": amts})
+        except:
+            return jsonify({})
+
+
 
 
 
